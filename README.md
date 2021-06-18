@@ -72,7 +72,7 @@ To get a local copy up and running follow these simple steps.
   
   Clone the repo
    ```
-    gh repo clone johnylouk1997/TTGO-LoRa-ESP32-BMP280
+    gh repo clone johnylouk1997/TTGO2TTNwBMP388
    ```
 
 
