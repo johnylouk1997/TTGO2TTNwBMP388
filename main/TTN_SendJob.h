@@ -2,6 +2,7 @@
 #include <hal/hal.h>
 
 static uint8_t mydata[10];
+static char buff[10];
 static osjob_t sendjob;
 // Schedule TX every this many seconds (might become longer due to duty cycle limitations).
 
@@ -9,26 +10,22 @@ const unsigned TX_INTERVAL = 60;
 
 static void printHex2(unsigned v) {
     v &= 0xff;
-    if (v < 16)
-        Serial.print('0');
-        Serial.print(v, HEX);
+    if (v < 16) Serial.print('0');
+    Serial.print(v, HEX);
 }
 
 static void do_send(osjob_t* j){
-  
-    char buff[10];
-    float temp = Temperature_Print();
-    Serial.printf("%f\n",temp);
 
-    sprintf(buff,"%f",temp);
+    // convert float to uint8_t!
+    sprintf(buff,"%f",Temperature_Print());
     for(int i=0; i<10; i++) mydata[i] = buff[i];
     
     // Check if there is not a current TX/RX job running
     if (LMIC.opmode & OP_TXRXPEND) Serial.println(F("OP_TXRXPEND, not sending"));
     else { // Prepare upstream data transmission at the next possible time.
-          LMIC_setTxData2(1, mydata, sizeof(mydata)-1, 0);
-          Serial.println(F("Sending uplink packet..."));
-         }// Next TX is scheduled after TX_COMPLETE event.
+      LMIC_setTxData2(1, mydata, sizeof(mydata)-1, 0);
+      Serial.println(F("Sending uplink packet..."));
+    }// Next TX is scheduled after TX_COMPLETE event.
 }
 
 void onEvent (ev_t ev) {
@@ -65,18 +62,15 @@ void onEvent (ev_t ev) {
               Serial.println(devaddr, HEX);
               Serial.print("AppSKey: ");
               for (size_t i=0; i<sizeof(artKey); ++i) {
-                if (i != 0)
-                  Serial.print("-");
+                if (i != 0) Serial.print("-");
                 printHex2(artKey[i]);
               }
               Serial.println("");
               Serial.print("NwkSKey: ");
               for (size_t i=0; i<sizeof(nwkKey); ++i) {
-                      if (i != 0)
-                              Serial.print("-");
-                      printHex2(nwkKey[i]);
-              }
-              Serial.println();
+                if (i != 0)Serial.print("-");
+                printHex2(nwkKey[i]);
+              }Serial.println();
             }
             // Disable link check validation (automatically enabled
             // during join, but because slow data rates change max TX
@@ -128,7 +122,6 @@ void onEvent (ev_t ev) {
         case EV_JOIN_TXCOMPLETE:
             Serial.println(F("EV_JOIN_TXCOMPLETE: no JoinAccept"));
             break;
-
         default:
             Serial.print(F("Unknown event: "));
             Serial.println((unsigned) ev);

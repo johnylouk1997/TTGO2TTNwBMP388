@@ -1,54 +1,48 @@
 #include <lmic.h>
 #include <hal/hal.h>
 
-#include "Temperature.h"  //Include Code For BMP388
-#include "TTN_SendJob.h"
+#include "Temperature.h"  /* Include Code For BMP388   */
+#include "TTN_SendJob.h"  /* Code For TTN transmittion */
 
-//========================================
+#define interval (1 * 60 * 60 * 1000) /* interval at which to reboot (aka transmit) */
+
+//=============================================================
 //          TTN Authentication
-//========================================
+//=============================================================
 
-static const u1_t 
-PROGMEM APPEUI[8]={ 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 }; //Must fill with your own appeui, in format lsb
+static const u1_t PROGMEM APPEUI[8] = { 
+  0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00
+}; //Must fill with your own appeui, in format lsb
 void os_getArtEui (u1_t* buf) { memcpy_P(buf, APPEUI, 8);}
 
-static const u1_t
-PROGMEM DEVEUI[8]={ 0x00 , 0x00 , 0x00 , 0x00, 0x00 , 0x00 , 0x00 , 0x00 }; //Must fill with your own deveui, in format lsb
+static const u1_t PROGMEM DEVEUI[8] = {
+  0x00 , 0x00 , 0x00 , 0x00, 0x00 , 0x00 , 0x00 , 0x00 
+}; //Must fill with your own deveui, in format lsb
 void os_getDevEui (u1_t* buf) { memcpy_P(buf, DEVEUI, 8);}
 
-static const u1_t 
-PROGMEM APPKEY[16] = {                 ////Must fill with your own appkey, in format msb 
-  0x00, 0x00, 0x00, 0x00,
-  0x00, 0x00, 0x00, 0x00,
-  0x00, 0x00, 0x00, 0x00,
-  0x00, 0x00, 0x00, 0x00
-};
+static const u1_t PROGMEM APPKEY[16] = {
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+}; //Must fill with your own appkey, in format msb
 void os_getDevKey (u1_t* buf) {  memcpy_P(buf, APPKEY, 16);}
 
-//========================================
 
-//========================================
+//===========================================================================
 //          TTGO LoRa ESP32 V2.0.0
 //URL for Board Manager: https://dl.espressif.com/dl/package_esp32_index.json
 //Board Manager search: esp32
-//========================================
+//===========================================================================
 
+
+
+//==================PINOUT==================================================
 const lmic_pinmap lmic_pins = {
     .nss = 18, 
     .rxtx = LMIC_UNUSED_PIN,
     .rst = 23,
     .dio = {/*dio0*/ 26, /*dio1*/ 33, /*dio2*/ 32}
 };
-
-//========================================
-
-
-// Generally, you should use "unsigned long" for variables that hold time
-// The value will quickly become too large for an int to store
-unsigned long previousMillis = 0;        
-
-// constants won't change:
-const long interval = 60* 60 * 1000;// interval at which to blink (milliseconds)
+//==========================================================================
 
 void setup() {
     Serial.begin(115200);
@@ -77,11 +71,8 @@ void setup() {
 }
 
 void loop(){ 
-    unsigned long currentMillis = millis();
-
-    if ((currentMillis - previousMillis) >= interval) {
-        previousMillis = currentMillis;
+    // Reboot the board when its time for a new transmittion
+    if (millis() >= interval)
         ESP.restart();
-    }  
-    os_runloop_once();
+    else os_runloop_once();
 }

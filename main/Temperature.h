@@ -2,7 +2,7 @@
  
 DFRobot_BMP388_I2C bmp388;
 
-float temperature = -51;
+float temperature = -51;// bmp388 outputs values above 50 Celsius
 
 void Temperature_Init(){
  while(bmp388.begin() != 0){
@@ -12,12 +12,10 @@ void Temperature_Init(){
 }
 
 float Temperature_Print(){
-  delay(2000);
-  temperature = bmp388.readTemperature();
-
-  if(temperature > (-51))
-  {
-    return temperature;
-  }
-  else Serial.println("No value of Temperature");
+  while (millis() < 2000); // wait for 2s
+  
+  do temperature = bmp388.readTemperature()
+  while (temperature == (-51));
+  
+  return temperature;
 }
