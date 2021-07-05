@@ -12,7 +12,7 @@ void Temperature_Init(){
 }
 
 float Temperature_Print(){
-  while (millis() < 2000); // wait for 2s
+  while (millis() < 2000){} // wait for 2s
   
   do temperature = bmp388.readTemperature()
   while (temperature == (-51));
